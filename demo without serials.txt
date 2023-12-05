@@ -1,0 +1,63 @@
+
+from pyqtgraph.Qt import QtCore, QtGui
+import numpy as np
+import pyqtgraph.opengl as gl
+import serial,struct,numpy
+
+
+## Create a GL View widget to display data
+app = QtGui.QApplication([])
+w = gl.GLViewWidget()
+w.show()
+w.setWindowTitle('pyqtgraph example: GLSurfacePlot')
+w.setCameraPosition(distance=100)
+
+g = gl.GLGridItem()
+g.scale(4,4,2)
+g.setDepthValue(10)  # draw grid after surfaces since they may be translucent
+w.addItem(g)
+
+
+## Animated example
+## compute surface vertex data
+cols = 29
+rows = 29
+x = np.linspace(-31, 31, cols+1).reshape(cols+1,1)
+y = np.linspace(-31, 32, rows+1).reshape(1,rows+1)
+
+
+## precompute height values for all frames
+
+## create a surface plot, tell it to use the 'heightColor' shader
+## since this does not require normal vectors to render (thus we
+## can set computeNormals=False to save time when the mesh updates)
+
+
+
+index = 0
+def update():
+    global p1, index, z
+    x = []
+    y = numpy.full((64,65),10)  # array size 64X65
+    for i in range(0, 30):
+        for j in range(0, 30):
+            x = x + [y[i][j]]
+    m = numpy.array(x).reshape(30, 30)
+    z = m
+    p1 = gl.GLSurfacePlotItem(z=z, shader='shaded', color=(0.5, 0.5, 1, 1))
+    p1.setData(z=z)
+    w.addItem(p1)
+    #z = np.random.normal(size=(2, 64, 65), loc=1024, scale=64).astype(np.uint16)
+    #p4.setData(z)
+
+update()
+print(z)
+timer = QtCore.QTimer()
+timer.timeout.connect(update)
+timer.start(50)
+
+## Start Qt event loop unless running in interactive mode.
+if __name__ == '__main__':
+    import sys
+    if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
+        QtGui.QApplication.instance().exec_()
